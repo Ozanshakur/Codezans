@@ -10,18 +10,21 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { username, password } = body
 
-    // Debug: Log den Anmeldeversuch
-    console.log('Login attempt for:', username)
+    if (!username || !password) {
+      return NextResponse.json(
+        { success: false, error: 'Benutzername und Passwort sind erforderlich' },
+        { status: 400 }
+      )
+    }
 
-    // Finde den Admin in der Datenbank
-    const admin = await prisma.admin.findUnique({
+    const admin = await prisma.admin.findFirst({
       where: {
         username: username
       }
     })
 
-    // Debug: Log ob ein Admin gefunden wurde
-    console.log('Admin found:', !!admin)
+    console.log('Login attempt for username:', username)
+    console.log('Admin found:', admin ? 'yes' : 'no')
 
     if (!admin) {
       return NextResponse.json(
@@ -30,12 +33,7 @@ export async function POST(request: Request) {
       )
     }
 
-    // Debug: Log das gespeicherte gehashte Passwort
-    console.log('Stored hashed password:', admin.password)
-
     const isValidPassword = await bcrypt.compare(password, admin.password)
-    
-    // Debug: Log ob das Passwort valide ist
     console.log('Password valid:', isValidPassword)
 
     if (!isValidPassword) {
@@ -47,16 +45,13 @@ export async function POST(request: Request) {
 
     const token = jwt.sign(
       { userId: admin.id },
-      JWT_SECRET || 'fallback-secret',
+      JWT_SECRET,
       { expiresIn: '24h' }
     )
 
-    return NextResponse.json({
-      success: true,
-      token
-    })
+    return NextResponse.json({ success: true, token })
   } catch (error) {
-    console.error('Auth error:', error)
+    console.error('Authentication error:', error)
     return NextResponse.json(
       { success: false, error: 'Ein Fehler ist aufgetreten' },
       { status: 500 }

@@ -15,10 +15,14 @@ export default function AdminLogin() {
 
     try {
       const formData = new FormData(e.currentTarget)
-      const username = formData.get('username')
-      const password = formData.get('password')
+      const username = formData.get('username')?.toString().trim()
+      const password = formData.get('password')?.toString()
 
-      console.log('Attempting login with username:', username) // Debug log
+      if (!username || !password) {
+        throw new Error('Bitte füllen Sie alle Felder aus')
+      }
+
+      console.log('Attempting login with username:', username)
 
       const response = await fetch('/api/auth', {
         method: 'POST',
@@ -31,16 +35,14 @@ export default function AdminLogin() {
         }),
       })
 
-      console.log('Response status:', response.status) // Debug log
-
       const data = await response.json()
-      console.log('Response data:', { ...data, token: data.token ? '[REDACTED]' : undefined }) // Debug log (ohne Token)
+      console.log('Login response:', data)
 
       if (!response.ok) {
         throw new Error(data.error || 'Ein Fehler ist aufgetreten')
       }
 
-      if (data.success) {
+      if (data.success && data.token) {
         localStorage.setItem('adminToken', data.token)
         toast({
           title: "Erfolg!",
@@ -48,9 +50,11 @@ export default function AdminLogin() {
           className: "bg-green-500 text-white border-none",
         })
         router.push('/admin')
+      } else {
+        throw new Error('Ungültige Anmeldedaten')
       }
     } catch (error) {
-      console.error('Login error:', error) // Debug log
+      console.error('Login error:', error)
       toast({
         title: "Fehler",
         description: error instanceof Error ? error.message : 'Ein Fehler ist aufgetreten',
