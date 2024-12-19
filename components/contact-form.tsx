@@ -2,17 +2,15 @@
 
 import { useState } from 'react'
 import type { ApiResponse } from '@/app/api/contact/types'
+import { useToast } from "@/components/ui/use-toast"
 
 export default function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [message, setMessage] = useState('')
-  const [error, setError] = useState('')
+  const { toast } = useToast()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
-    setMessage('')
-    setError('')
 
     try {
       const formData = new FormData(e.currentTarget)
@@ -35,12 +33,19 @@ export default function ContactForm() {
       }
 
       if (data.success) {
-        setMessage(data.message || 'Nachricht erfolgreich gesendet!')
         e.currentTarget.reset()
+        toast({
+          title: "Erfolg!",
+          description: "Ihre Nachricht wurde erfolgreich gesendet.",
+          className: "bg-green-500 text-white border-none",
+        })
       }
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Ein Fehler ist aufgetreten')
-      console.error('Form submission error:', error)
+      toast({
+        title: "Fehler",
+        description: error instanceof Error ? error.message : 'Ein Fehler ist aufgetreten',
+        variant: "destructive",
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -100,12 +105,6 @@ export default function ContactForm() {
             >
               {isSubmitting ? 'Wird gesendet...' : 'Nachricht senden'}
             </button>
-            {message && (
-              <p className="text-green-400 text-center">{message}</p>
-            )}
-            {error && (
-              <p className="text-red-400 text-center">{error}</p>
-            )}
           </form>
         </div>
       </div>
