@@ -9,12 +9,15 @@ export async function POST(request: Request) {
 
     if (!name || !email || !message) {
       return NextResponse.json(
-        { error: 'Alle Felder müssen ausgefüllt sein' },
+        { 
+          success: false,
+          error: 'Alle Felder müssen ausgefüllt sein' 
+        },
         { status: 400 }
       )
     }
 
-    const contact: Contact = await prisma.contact.create({
+    const contact = await prisma.contact.create({
       data: {
         name,
         email,
@@ -30,7 +33,10 @@ export async function POST(request: Request) {
   } catch (err) {
     console.error('Contact form error:', err)
     return NextResponse.json(
-      { error: 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.' },
+      { 
+        success: false,
+        error: 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.' 
+      },
       { status: 500 }
     )
   }

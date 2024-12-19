@@ -30,14 +30,16 @@ export default function ContactForm() {
 
       const data: ApiResponse = await response.json()
 
-      if (response.ok && data.success) {
+      if (!response.ok) {
+        throw new Error(data.error || 'Ein Fehler ist aufgetreten')
+      }
+
+      if (data.success) {
         setMessage(data.message || 'Nachricht erfolgreich gesendet!')
         e.currentTarget.reset()
-      } else {
-        setError(data.error || 'Ein Fehler ist aufgetreten')
       }
     } catch (error) {
-      setError('Ein Fehler ist aufgetreten')
+      setError(error instanceof Error ? error.message : 'Ein Fehler ist aufgetreten')
       console.error('Form submission error:', error)
     } finally {
       setIsSubmitting(false)
