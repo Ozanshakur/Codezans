@@ -3,15 +3,18 @@ import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
+// Ensure JWT_SECRET is available and is a string
+const JWT_SECRET = process.env.JWT_SECRET
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is not set')
+}
 
 export async function POST(request: Request) {
   try {
     const body = await request.json()
     const { username, password } = body
 
-    console.log('Login attempt for username:', username) // Debug log
-
+    // Validate input
     if (!username || !password) {
       return NextResponse.json(
         { success: false, error: 'Username and password are required' },
@@ -19,41 +22,50 @@ export async function POST(request: Request) {
       )
     }
 
+    // Find admin
     const admin = await prisma.admin.findUnique({
-      where: { username },
+      where: { username }
     })
-
-    console.log('Admin found:', admin ? 'yes' : 'no') // Debug log
 
     if (!admin) {
+      console.log('Admin not found:', username)
       return NextResponse.json(
         { success: false, error: 'Ungültige Anmeldedaten' },
         { status: 401 }
       )
     }
 
-    const isValidPassword = await bcrypt.compare(password, admin.password)
-    console.log('Password valid:', isValidPassword) // Debug log
-
-    if (!isValidPassword) {
+    // Verify password
+    const isValid = await bcrypt.compare(password, admin.password)
+    
+    if (!isValid) {
+      console.log('Invalid password for:', username)
       return NextResponse.json(
         { success: false, error: 'Ungültige Anmeldedaten' },
         { status: 401 }
       )
     }
 
-    const token = jwt.sign({ userId: admin.id }, JWT_SECRET, {
-      expiresIn: '1d',
+    // Generate token with type-safe JWT_SECRET
+    const token = jwt.sign(
+      { 
+        userId: admin.id,
+        username: admin.username 
+      }, 
+      JWT_SECRET as string, // Type assertion since we've checked it exists above
+      { expiresIn: '24h' }
+    )
+
+    // Return success response
+    return NextResponse.json({
+      success: true,
+      token
     })
 
-    return NextResponse.json({ 
-      success: true, 
-      token 
-    })
-  } catch (err) {
-    console.error('Authentication error:', err)
+  } catch (error) {
+    console.error('Auth error:', error)
     return NextResponse.json(
-      { success: false, error: 'Internal Server Error' },
+      { success: false, error: 'Ein Fehler ist aufgetreten' },
       { status: 500 }
     )
   }
