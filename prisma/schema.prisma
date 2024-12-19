@@ -1,12 +1,16 @@
-generator client {
-  provider = "prisma-client-js"
-  previewFeatures = ["referentialIntegrity"]
-}
-
 datasource db {
   provider = "postgresql"
-  url = env("DATABASE_URL")
-  relationMode = "prisma"
+  url      = env("POSTGRES_PRISMA_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Admin {
+  id       String @id @default(cuid())
+  username String @unique
+  password String
 }
 
 model Contact {
@@ -16,12 +20,6 @@ model Contact {
   message   String
   completed Boolean  @default(false)
   createdAt DateTime @default(now())
-}
-
-model Admin {
-  id       String @id @default(cuid())
-  username String @unique
-  password String
 }
 
 model PageView {
