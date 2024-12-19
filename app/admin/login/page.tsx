@@ -15,18 +15,26 @@ export default function AdminLogin() {
 
     try {
       const formData = new FormData(e.currentTarget)
+      const username = formData.get('username')
+      const password = formData.get('password')
+
+      console.log('Attempting login with username:', username) // Debug log
+
       const response = await fetch('/api/auth', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username: formData.get('username'),
-          password: formData.get('password'),
+          username,
+          password,
         }),
       })
 
+      console.log('Response status:', response.status) // Debug log
+
       const data = await response.json()
+      console.log('Response data:', { ...data, token: data.token ? '[REDACTED]' : undefined }) // Debug log (ohne Token)
 
       if (!response.ok) {
         throw new Error(data.error || 'Ein Fehler ist aufgetreten')
@@ -42,6 +50,7 @@ export default function AdminLogin() {
         router.push('/admin')
       }
     } catch (error) {
+      console.error('Login error:', error) // Debug log
       toast({
         title: "Fehler",
         description: error instanceof Error ? error.message : 'Ein Fehler ist aufgetreten',

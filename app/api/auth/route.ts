@@ -3,7 +3,6 @@ import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 
-// Ensure JWT_SECRET is available and is a string
 const JWT_SECRET = process.env.JWT_SECRET
 if (!JWT_SECRET) {
   throw new Error('JWT_SECRET environment variable is not set')
@@ -14,47 +13,53 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { username, password } = body
 
-    // Validate input
-    if (!username || !password) {
-      return NextResponse.json(
-        { success: false, error: 'Username and password are required' },
-        { status: 400 }
-      )
+    console.log('Auth attempt:', { username }) // Log login attempt
+
+    // Test database connection
+    try {
+      await prisma.$connect()
+      console.log('Database connection successful')
+    } catch (error) {
+      console.error('Database connection failed:', error)
+      throw error
     }
 
-    // Find admin
+    // Find admin with detailed logging
+    console.log('Searching for admin with username:', username)
     const admin = await prisma.admin.findUnique({
       where: { username }
     })
+    console.log('Admin found:', admin ? 'Yes' : 'No')
 
     if (!admin) {
-      console.log('Admin not found:', username)
       return NextResponse.json(
         { success: false, error: 'Ungültige Anmeldedaten' },
         { status: 401 }
       )
     }
 
-    // Verify password
+    // Verify password with logging
+    console.log('Verifying password...')
     const isValid = await bcrypt.compare(password, admin.password)
+    console.log('Password valid:', isValid)
     
     if (!isValid) {
-      console.log('Invalid password for:', username)
       return NextResponse.json(
         { success: false, error: 'Ungültige Anmeldedaten' },
         { status: 401 }
       )
     }
 
-    // Generate token with type-safe JWT_SECRET
+    // Generate token
     const token = jwt.sign(
       { 
         userId: admin.id,
         username: admin.username 
       }, 
-      JWT_SECRET as string, // Type assertion since we've checked it exists above
+      JWT_SECRET as string,
       { expiresIn: '24h' }
     )
+    console.log('Token generated successfully')
 
     // Return success response
     return NextResponse.json({
@@ -68,6 +73,8 @@ export async function POST(request: Request) {
       { success: false, error: 'Ein Fehler ist aufgetreten' },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
