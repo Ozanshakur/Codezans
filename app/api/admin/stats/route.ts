@@ -18,7 +18,8 @@ export async function GET() {
       totalPageViews,
       completedContacts,
     })
-  } catch (error) {
+  } catch (err) {
+    console.error('Failed to fetch stats:', err)
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }

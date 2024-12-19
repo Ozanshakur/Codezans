@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import type { ApiResponse } from '@/app/api/contact/types'
 
 export default function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -14,11 +14,9 @@ export default function ContactForm() {
     setMessage('')
     setError('')
 
-    const form = e.currentTarget
-    const formData = new FormData(form)
-
     try {
-      const res = await fetch('/api/contact', {
+      const formData = new FormData(e.currentTarget)
+      const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -30,16 +28,17 @@ export default function ContactForm() {
         }),
       })
 
-      const data = await res.json()
+      const data: ApiResponse = await response.json()
 
-      if (res.ok) {
-        setMessage('Nachricht erfolgreich gesendet!')
-        form.reset()
+      if (response.ok && data.success) {
+        setMessage(data.message || 'Nachricht erfolgreich gesendet!')
+        e.currentTarget.reset()
       } else {
         setError(data.error || 'Ein Fehler ist aufgetreten')
       }
-    } catch (err) {
+    } catch (error) {
       setError('Ein Fehler ist aufgetreten')
+      console.error('Form submission error:', error)
     } finally {
       setIsSubmitting(false)
     }

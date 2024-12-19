@@ -9,7 +9,8 @@ export async function GET() {
       },
     })
     return NextResponse.json(contacts)
-  } catch (error) {
+  } catch (err) {
+    console.error('Failed to fetch contacts:', err)
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }
