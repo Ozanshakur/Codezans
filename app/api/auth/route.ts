@@ -13,22 +13,37 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { username, password } = body
 
-    console.log('Auth attempt:', { username }) // Log login attempt
+    console.log('Auth attempt with username:', username)
 
-    // Test database connection
+    // Test database connection and log all admin users
     try {
       await prisma.$connect()
       console.log('Database connection successful')
+      
+      // Log all admin users for debugging
+      const allAdmins = await prisma.admin.findMany({
+        select: {
+          username: true,
+          id: true
+        }
+      })
+      console.log('Available admin users:', allAdmins)
+      
     } catch (error) {
       console.error('Database connection failed:', error)
       throw error
     }
 
-    // Find admin with detailed logging
-    console.log('Searching for admin with username:', username)
-    const admin = await prisma.admin.findUnique({
-      where: { username }
+    // Find admin with case-insensitive search
+    const admin = await prisma.admin.findFirst({
+      where: {
+        username: {
+          equals: username,
+          mode: 'insensitive'
+        }
+      }
     })
+
     console.log('Admin found:', admin ? 'Yes' : 'No')
 
     if (!admin) {
