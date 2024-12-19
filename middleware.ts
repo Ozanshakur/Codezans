@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { jwtVerify } from 'jose'
+import { verify } from 'jsonwebtoken'
+
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key'
 
 export async function middleware(request: NextRequest) {
   // Nur Admin-Routen schützen
@@ -20,10 +22,8 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    await jwtVerify(
-      token,
-      new TextEncoder().encode(process.env.JWT_SECRET)
-    )
+    // Token verifizieren
+    verify(token, JWT_SECRET)
     return NextResponse.next()
   } catch (error) {
     return NextResponse.redirect(new URL('/admin/login', request.url))
@@ -31,6 +31,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: '/admin/:path*',
+  matcher: ['/admin/:path*']
 }
 
