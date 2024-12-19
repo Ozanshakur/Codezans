@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import type { ApiResponse } from '@/app/api/contact/types'
 import { useToast } from "@/components/ui/use-toast"
 
 export default function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
+  const formRef = useRef<HTMLFormElement>(null)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -33,7 +34,7 @@ export default function ContactForm() {
       }
 
       if (data.success) {
-        e.currentTarget.reset()
+        formRef.current?.reset()
         toast({
           title: "Erfolg!",
           description: "Ihre Nachricht wurde erfolgreich gesendet.",
@@ -58,7 +59,7 @@ export default function ContactForm() {
           <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-8">
             Kontaktieren Sie uns
           </h2>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="name" className="block text-white mb-2">
                 Name
