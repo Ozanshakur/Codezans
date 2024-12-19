@@ -5,7 +5,6 @@ import './globals.css'
 const inter = Inter({ 
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-inter',
 })
 
 export const metadata: Metadata = {
@@ -19,8 +18,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="de" className={`${inter.variable} scroll-smooth`}>
-      <body className={`${inter.className} min-h-screen bg-background antialiased`}>
+    <html lang="de" className="scroll-smooth">
+      <body className={`${inter.className} min-h-screen bg-black`}>
         {children}
       </body>
     </html>
