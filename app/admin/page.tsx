@@ -80,8 +80,10 @@ export default function AdminDashboard() {
         body: JSON.stringify({ completed: true }),
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        throw new Error('Failed to update contact')
+        throw new Error(data.error || 'Failed to update contact')
       }
 
       toast({
@@ -90,14 +92,19 @@ export default function AdminDashboard() {
         className: "bg-green-500 text-white border-none",
       })
 
-      fetchData() // Daten neu laden
+      fetchData() // Reload data
     } catch (error) {
       console.error('Error updating contact:', error)
       toast({
         title: "Fehler",
-        description: "Fehler beim Aktualisieren der Anfrage",
+        description: error instanceof Error ? error.message : 'Fehler beim Aktualisieren der Anfrage',
         variant: "destructive",
       })
+
+      // If unauthorized, redirect to login
+      if (error instanceof Error && error.message.includes('token')) {
+        router.push('/admin/login')
+      }
     }
   }
 
@@ -115,8 +122,10 @@ export default function AdminDashboard() {
         },
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        throw new Error('Failed to delete contact')
+        throw new Error(data.error || 'Failed to delete contact')
       }
 
       toast({
@@ -125,14 +134,19 @@ export default function AdminDashboard() {
         className: "bg-green-500 text-white border-none",
       })
 
-      fetchData() // Daten neu laden
+      fetchData() // Reload data
     } catch (error) {
       console.error('Error deleting contact:', error)
       toast({
         title: "Fehler",
-        description: "Fehler beim Löschen der Anfrage",
+        description: error instanceof Error ? error.message : 'Fehler beim Löschen der Anfrage',
         variant: "destructive",
       })
+
+      // If unauthorized, redirect to login
+      if (error instanceof Error && error.message.includes('token')) {
+        router.push('/admin/login')
+      }
     }
   }
 

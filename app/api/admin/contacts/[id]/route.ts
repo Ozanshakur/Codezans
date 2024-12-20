@@ -1,16 +1,26 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import jwt from 'jsonwebtoken'
+
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key'
 
 // Helper function to verify admin token
 const verifyAdminToken = async (request: Request) => {
-  const token = request.headers.get('authorization')?.split(' ')[1]
-  if (!token) {
-    throw new Error('No authorization token provided')
+  const authHeader = request.headers.get('authorization')
+  if (!authHeader?.startsWith('Bearer ')) {
+    throw new Error('Invalid authorization header')
   }
-  return token
+
+  const token = authHeader.split(' ')[1]
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET)
+    return decoded
+  } catch (error) {
+    throw new Error('Invalid token')
+  }
 }
 
-// Handler für PATCH-Anfragen (Kontakt als abgeschlossen markieren)
+// Handler for PATCH requests (mark contact as completed)
 export async function PATCH(
   request: Request,
   { params }: { params: { id: string } }
@@ -22,7 +32,7 @@ export async function PATCH(
     // Validate ID
     if (!params.id) {
       return NextResponse.json(
-        { success: false, error: 'Keine ID angegeben' },
+        { success: false, error: 'No ID provided' },
         { status: 400 }
       )
     }
@@ -30,18 +40,23 @@ export async function PATCH(
     // Parse request body
     const body = await request.json()
 
-    // Update contact in database
-    const updatedContact = await prisma.contact.update({
-      where: {
-        id: params.id
-      },
-      data: {
-        completed: body.completed
-      }
+    // Check if contact exists
+    const existingContact = await prisma.contact.findUnique({
+      where: { id: params.id }
     })
 
-    // Disconnect from database
-    await prisma.$disconnect()
+    if (!existingContact) {
+      return NextResponse.json(
+        { success: false, error: 'Contact not found' },
+        { status: 404 }
+      )
+    }
+
+    // Update contact in database
+    const updatedContact = await prisma.contact.update({
+      where: { id: params.id },
+      data: { completed: body.completed }
+    })
 
     return NextResponse.json({
       success: true,
@@ -49,31 +64,28 @@ export async function PATCH(
     })
 
   } catch (error) {
-    // Ensure database connection is closed
-    await prisma.$disconnect()
-
     console.error('Error updating contact:', error)
     
-    // Return appropriate error response
     if (error instanceof Error) {
       return NextResponse.json(
         { 
           success: false, 
-          error: error.message,
-          details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+          error: error.message 
         },
-        { status: 500 }
+        { status: error.message.includes('token') ? 401 : 500 }
       )
     }
 
     return NextResponse.json(
-      { success: false, error: 'Ein unbekannter Fehler ist aufgetreten' },
+      { success: false, error: 'An unknown error occurred' },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
-// Handler für DELETE-Anfragen (Kontakt löschen)
+// Handler for DELETE requests (delete contact)
 export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
@@ -85,48 +97,52 @@ export async function DELETE(
     // Validate ID
     if (!params.id) {
       return NextResponse.json(
-        { success: false, error: 'Keine ID angegeben' },
+        { success: false, error: 'No ID provided' },
         { status: 400 }
+      )
+    }
+
+    // Check if contact exists
+    const existingContact = await prisma.contact.findUnique({
+      where: { id: params.id }
+    })
+
+    if (!existingContact) {
+      return NextResponse.json(
+        { success: false, error: 'Contact not found' },
+        { status: 404 }
       )
     }
 
     // Delete contact from database
     await prisma.contact.delete({
-      where: {
-        id: params.id
-      }
+      where: { id: params.id }
     })
-
-    // Disconnect from database
-    await prisma.$disconnect()
 
     return NextResponse.json({
       success: true,
-      message: 'Kontakt erfolgreich gelöscht'
+      message: 'Contact successfully deleted'
     })
 
   } catch (error) {
-    // Ensure database connection is closed
-    await prisma.$disconnect()
-
     console.error('Error deleting contact:', error)
     
-    // Return appropriate error response
     if (error instanceof Error) {
       return NextResponse.json(
         { 
           success: false, 
-          error: error.message,
-          details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+          error: error.message 
         },
-        { status: 500 }
+        { status: error.message.includes('token') ? 401 : 500 }
       )
     }
 
     return NextResponse.json(
-      { success: false, error: 'Ein unbekannter Fehler ist aufgetreten' },
+      { success: false, error: 'An unknown error occurred' },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
