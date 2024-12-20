@@ -25,6 +25,8 @@ export async function POST(request: Request) {
       }
     })
 
+    console.log('Admin found:', admin ? 'yes' : 'no')
+
     if (!admin) {
       return NextResponse.json(
         { success: false, error: 'Ungültige Anmeldedaten' },
@@ -33,6 +35,7 @@ export async function POST(request: Request) {
     }
 
     const isValidPassword = await bcrypt.compare(password, admin.password)
+    console.log('Password valid:', isValidPassword)
 
     if (!isValidPassword) {
       return NextResponse.json(
@@ -50,9 +53,9 @@ export async function POST(request: Request) {
       { expiresIn: '24h' }
     )
 
-    // Set HTTP-only cookie
-    const response = NextResponse.json({ 
-      success: true, 
+    // Create response with both cookie and JSON
+    const response = NextResponse.json({
+      success: true,
       token,
       user: {
         id: admin.id,
@@ -60,6 +63,7 @@ export async function POST(request: Request) {
       }
     })
 
+    // Set HTTP-only cookie
     response.cookies.set('adminToken', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
