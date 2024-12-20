@@ -6,14 +6,15 @@ import { useToast } from "@/components/ui/use-toast"
 
 export default function AdminLogin() {
   const [isLoading, setIsLoading] = useState(false)
+  const [isRedirecting, setIsRedirecting] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
 
-  // Check if already logged in
   useEffect(() => {
+    // Check if user is already logged in
     const token = localStorage.getItem('adminToken')
     if (token) {
-      router.push('/admin')
+      router.replace('/admin')
     }
   }, [router])
 
@@ -48,8 +49,9 @@ export default function AdminLogin() {
       }
 
       if (data.success && data.token) {
-        // Store token
+        // Store token and user data
         localStorage.setItem('adminToken', data.token)
+        localStorage.setItem('adminUser', JSON.stringify(data.user))
         
         // Show success message
         toast({
@@ -58,23 +60,34 @@ export default function AdminLogin() {
           className: "bg-green-500 text-white border-none",
         })
 
-        // Force navigation and refresh
-        setTimeout(() => {
-          router.push('/admin')
-          router.refresh()
-        }, 500)
-      } else {
-        throw new Error('Ungültige Anmeldedaten')
+        // Set redirecting state
+        setIsRedirecting(true)
+
+        // Force hard navigation to admin page
+        window.location.href = '/admin'
       }
     } catch (error) {
+      console.error('Login error:', error)
       toast({
         title: "Fehler",
         description: error instanceof Error ? error.message : 'Ein Fehler ist aufgetreten',
         variant: "destructive",
       })
+      setIsRedirecting(false)
     } finally {
       setIsLoading(false)
     }
+  }
+
+  if (isRedirecting) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-purple-900 to-black">
+        <div className="text-white text-center">
+          <div className="mb-4">Weiterleitung zum Dashboard...</div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -110,10 +123,10 @@ export default function AdminLogin() {
           </div>
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || isRedirecting}
             className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
           >
-            {isLoading ? 'Wird geladen...' : 'Anmelden'}
+            {isLoading ? 'Wird geladen...' : isRedirecting ? 'Weiterleitung...' : 'Anmelden'}
           </button>
         </form>
       </div>

@@ -10,10 +10,9 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { username, password } = body
 
-    console.log('Auth attempt for:', username)
+    console.log('Login attempt for:', username)
 
     if (!username || !password) {
-      console.log('Missing credentials')
       return NextResponse.json(
         { success: false, error: 'Benutzername und Passwort sind erforderlich' },
         { status: 400 }
@@ -26,54 +25,54 @@ export async function POST(request: Request) {
       }
     })
 
-    console.log('Admin found:', admin ? 'yes' : 'no')
-
     if (!admin) {
-      console.log('No admin found with username:', username)
       return NextResponse.json(
         { success: false, error: 'Ungültige Anmeldedaten' },
         { status: 401 }
       )
     }
 
-    try {
-      console.log('Attempting password comparison')
-      const isValidPassword = await bcrypt.compare(password, admin.password)
-      console.log('Password comparison result:', isValidPassword)
+    const isValidPassword = await bcrypt.compare(password, admin.password)
 
-      if (!isValidPassword) {
-        console.log('Invalid password for user:', username)
-        return NextResponse.json(
-          { success: false, error: 'Ungültige Anmeldedaten' },
-          { status: 401 }
-        )
-      }
-    } catch (bcryptError) {
-      console.error('bcrypt comparison error:', bcryptError)
-      throw new Error('Password comparison failed')
+    if (!isValidPassword) {
+      return NextResponse.json(
+        { success: false, error: 'Ungültige Anmeldedaten' },
+        { status: 401 }
+      )
     }
 
     const token = jwt.sign(
-      { userId: admin.id },
+      { 
+        userId: admin.id,
+        username: admin.username 
+      },
       JWT_SECRET,
       { expiresIn: '24h' }
     )
 
-    return NextResponse.json({ success: true, token })
+    // Set HTTP-only cookie
+    const response = NextResponse.json({ 
+      success: true, 
+      token,
+      user: {
+        id: admin.id,
+        username: admin.username
+      }
+    })
+
+    response.cookies.set('adminToken', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 // 24 hours
+    })
+
+    return response
+
   } catch (error) {
-    // Detailed error logging
-    console.error('Full authentication error:', error)
-    if (error instanceof Error) {
-      console.error('Error message:', error.message)
-      console.error('Error stack:', error.stack)
-    }
-    
+    console.error('Authentication error:', error)
     return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Ein Fehler ist aufgetreten',
-        details: process.env.NODE_ENV === 'development' ? error : undefined
-      },
+      { success: false, error: 'Ein Fehler ist aufgetreten' },
       { status: 500 }
     )
   }
