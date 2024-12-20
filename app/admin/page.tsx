@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
+import { useToast } from "@/components/ui/use-toast"
 
 interface Contact {
   id: string
@@ -23,40 +24,12 @@ export default function AdminDashboard() {
   const [contacts, setContacts] = useState<Contact[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const router = useRouter()
+  const { toast } = useToast()
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem('adminToken')
-      if (!token) {
-        router.replace('/admin/login')
-        return
-      }
-
-      try {
-        // Verify token by making a request to a protected endpoint
-        const response = await fetch('/api/admin/verify', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        })
-
-        if (!response.ok) {
-          throw new Error('Invalid token')
-        }
-
-        setIsAuthenticated(true)
-        fetchData()
-      } catch (error) {
-        console.error('Auth error:', error)
-        localStorage.removeItem('adminToken')
-        router.replace('/admin/login')
-      }
-    }
-
-    checkAuth()
-  }, [router])
+    fetchData()
+  }, [])
 
   const fetchData = async () => {
     try {
@@ -85,6 +58,11 @@ export default function AdminDashboard() {
       setStats(statsData)
     } catch (error) {
       console.error('Error fetching data:', error)
+      toast({
+        title: "Fehler",
+        description: "Fehler beim Laden der Daten",
+        variant: "destructive",
+      })
     } finally {
       setIsLoading(false)
     }
@@ -96,17 +74,30 @@ export default function AdminDashboard() {
       const response = await fetch(`/api/admin/contacts/${id}`, {
         method: 'PATCH',
         headers: {
-          Authorization: `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ completed: true }),
       })
 
-      if (response.ok) {
-        fetchData()
+      if (!response.ok) {
+        throw new Error('Failed to update contact')
       }
+
+      toast({
+        title: "Erfolg",
+        description: "Anfrage wurde als abgeschlossen markiert",
+        className: "bg-green-500 text-white border-none",
+      })
+
+      fetchData() // Daten neu laden
     } catch (error) {
       console.error('Error updating contact:', error)
+      toast({
+        title: "Fehler",
+        description: "Fehler beim Aktualisieren der Anfrage",
+        variant: "destructive",
+      })
     }
   }
 
@@ -120,19 +111,32 @@ export default function AdminDashboard() {
       const response = await fetch(`/api/admin/contacts/${id}`, {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`,
         },
       })
 
-      if (response.ok) {
-        fetchData()
+      if (!response.ok) {
+        throw new Error('Failed to delete contact')
       }
+
+      toast({
+        title: "Erfolg",
+        description: "Anfrage wurde erfolgreich gelöscht",
+        className: "bg-green-500 text-white border-none",
+      })
+
+      fetchData() // Daten neu laden
     } catch (error) {
       console.error('Error deleting contact:', error)
+      toast({
+        title: "Fehler",
+        description: "Fehler beim Löschen der Anfrage",
+        variant: "destructive",
+      })
     }
   }
 
-  if (!isAuthenticated || isLoading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-black via-purple-900 to-black">
         <div className="text-white text-center">
