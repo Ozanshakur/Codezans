@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from "@/components/ui/use-toast"
 
@@ -8,15 +8,6 @@ export default function AdminLogin() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
-  const formRef = useRef<HTMLFormElement>(null)
-
-  // Check if already logged in
-  useEffect(() => {
-    const token = localStorage.getItem('adminToken')
-    if (token) {
-      window.location.href = '/admin'
-    }
-  }, [])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -49,23 +40,18 @@ export default function AdminLogin() {
       }
 
       if (data.success && data.token) {
-        // Store token
+        // Token im localStorage speichern
         localStorage.setItem('adminToken', data.token)
         
-        // Reset form
-        formRef.current?.reset()
-        
-        // Show success message
+        // Erfolgsmeldung anzeigen
         toast({
           title: "Erfolg!",
           description: "Sie wurden erfolgreich eingeloggt.",
           className: "bg-green-500 text-white border-none",
         })
 
-        // Force page reload and redirect
-        setTimeout(() => {
-          window.location.href = '/admin'
-        }, 500)
+        // Zum Admin-Dashboard weiterleiten
+        window.location.href = '/admin'
       }
     } catch (error) {
       console.error('Login error:', error)
@@ -83,7 +69,7 @@ export default function AdminLogin() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-purple-900 to-black">
       <div className="bg-white/10 backdrop-blur-lg p-8 rounded-lg w-full max-w-md">
         <h1 className="text-2xl font-bold text-white mb-6">Admin Login</h1>
-        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="username" className="block text-white mb-2">
               Benutzername
