@@ -281,18 +281,18 @@ export default function AdminDashboard() {
       </div>
 
       <Dialog open={!!selectedMessage} onOpenChange={() => setSelectedMessage(null)}>
-        <DialogContent className="bg-gray-900 text-white border-purple-500/20">
+        <DialogContent className="bg-gray-900 text-white border-purple-500/20 w-full max-w-[500px] overflow-hidden">
           <DialogHeader>
             <DialogTitle className="text-xl mb-4">Nachricht von {selectedMessage?.name}</DialogTitle>
           </DialogHeader>
-          <div className="mt-4 space-y-4">
+          <div className="mt-4 space-y-4 overflow-y-auto max-h-[60vh]">
             <div>
               <h4 className="text-sm font-semibold text-gray-400">Email:</h4>
               <p className="text-white">{selectedMessage?.email}</p>
             </div>
             <div>
               <h4 className="text-sm font-semibold text-gray-400">Nachricht:</h4>
-              <p className="text-white break-words max-w-full">{selectedMessage?.message}</p>
+              <p className="text-white whitespace-pre-wrap break-words">{selectedMessage?.message}</p>
             </div>
             <div>
               <h4 className="text-sm font-semibold text-gray-400">Datum:</h4>
