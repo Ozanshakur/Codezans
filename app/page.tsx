@@ -6,6 +6,8 @@ import How from '@/components/how'
 import Pricing from '@/components/pricing'
 import ContactForm from '@/components/contact-form'
 import Footer from '@/components/footer'
+import Portfolio from '@/components/portfolio'
+import Testimonials from '@/components/testimonials'
 
 export default function Home() {
   return (
@@ -15,6 +17,7 @@ export default function Home() {
       <About />
       <Why />
       <How />
+      <Testimonials />
       <Pricing />
       <ContactForm />
       <Footer />

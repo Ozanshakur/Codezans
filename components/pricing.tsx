@@ -22,31 +22,37 @@ export default function Pricing() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="bg-white/5 backdrop-blur-lg rounded-lg p-8"
+              className="bg-white/5 backdrop-blur-lg rounded-lg p-8 flex flex-col justify-between"
             >
-              <h3 className="text-xl font-semibold mb-4">Starter</h3>
-              <div className="mb-6">
-                <span className="text-4xl font-bold">€999</span>
-                <span className="text-gray-400">/einmalig</span>
+              <div>
+                <h3 className="text-xl font-semibold mb-4">Starter</h3>
+                <div className="mb-6">
+                  <span className="text-4xl font-bold">299€</span>
+                  <span className="text-gray-400">/einmalig</span>
+                </div>
+                <ul className="space-y-4 mb-8">
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-purple-500" />
+                    <span>Responsive Design</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-purple-500" />
+                    <span>3 Unterseiten</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-purple-500" />
+                    <span>Kontaktformular</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-purple-500" />
+                    <span>SEO Grundoptimierung</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-purple-500" />
+                    <span>Premium Support</span>
+                  </li>
+                </ul>
               </div>
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-purple-500" />
-                  <span>Responsive Design</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-purple-500" />
-                  <span>5 Unterseiten</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-purple-500" />
-                  <span>Kontaktformular</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-purple-500" />
-                  <span>SEO Grundoptimierung</span>
-                </li>
-              </ul>
               <a
                 href="#contact"
                 className="block text-center bg-purple-500 text-white py-2 px-4 rounded-lg hover:bg-purple-600 transition-colors"
@@ -59,35 +65,37 @@ export default function Pricing() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
-              className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg p-8 transform scale-105"
+              className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg p-8 transform scale-105 flex flex-col justify-between"
             >
-              <h3 className="text-xl font-semibold mb-4">Professional</h3>
-              <div className="mb-6">
-                <span className="text-4xl font-bold">€1999</span>
-                <span className="text-gray-100">/einmalig</span>
+              <div>
+                <h3 className="text-xl font-semibold mb-4">Professional</h3>
+                <div className="mb-6">
+                  <span className="text-4xl font-bold">599€</span>
+                  <span className="text-gray-100">/einmalig</span>
+                </div>
+                <ul className="space-y-4 mb-8">
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-white" />
+                    <span>Alles aus Starter</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-white" />
+                    <span>6 Unterseiten</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-white" />
+                    <span>Blog-System</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-white" />
+                    <span>Erweiterte SEO</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-white" />
+                    <span>Premium Support</span>
+                  </li>
+                </ul>
               </div>
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-white" />
-                  <span>Alles aus Starter</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-white" />
-                  <span>10 Unterseiten</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-white" />
-                  <span>Blog-System</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-white" />
-                  <span>Newsletter-Integration</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-white" />
-                  <span>Erweiterte SEO</span>
-                </li>
-              </ul>
               <a
                 href="#contact"
                 className="block text-center bg-white text-purple-500 py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors"
@@ -100,35 +108,37 @@ export default function Pricing() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.4 }}
-              className="bg-white/5 backdrop-blur-lg rounded-lg p-8"
+              className="bg-white/5 backdrop-blur-lg rounded-lg p-8 flex flex-col justify-between"
             >
-              <h3 className="text-xl font-semibold mb-4">Enterprise</h3>
-              <div className="mb-6">
-                <span className="text-4xl font-bold">€3999</span>
-                <span className="text-gray-400">/einmalig</span>
+              <div>
+                <h3 className="text-xl font-semibold mb-4">Enterprise</h3>
+                <div className="mb-6">
+                  <span className="text-4xl font-bold">800€</span>
+                  <span className="text-gray-400">/einmalig</span>
+                </div>
+                <ul className="space-y-4 mb-8">
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-purple-500" />
+                    <span>Alles aus Professional</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-purple-500" />
+                    <span>Unbegrenzte Unterseiten</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-purple-500" />
+                    <span>E-Commerce Integration</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-purple-500" />
+                    <span>Wunsch Funktionen</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-purple-500" />
+                    <span>Premium Support</span>
+                  </li>
+                </ul>
               </div>
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-purple-500" />
-                  <span>Alles aus Professional</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-purple-500" />
-                  <span>Unbegrenzte Unterseiten</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-purple-500" />
-                  <span>E-Commerce Integration</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-purple-500" />
-                  <span>Custom Funktionen</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-purple-500" />
-                  <span>Premium Support</span>
-                </li>
-              </ul>
               <a
                 href="#contact"
                 className="block text-center bg-purple-500 text-white py-2 px-4 rounded-lg hover:bg-purple-600 transition-colors"
