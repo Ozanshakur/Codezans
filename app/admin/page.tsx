@@ -216,7 +216,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        <div className="bg-white/10 backdrop-blur-lg rounded-lg overflow-hidden">
+        <div className="bg-white/10 backdrop-blur-lg rounded-lg overflow-hidden overflow-x-auto">
           {contacts.length > 0 ? (
             <table className="w-full">
               <thead>
@@ -233,7 +233,14 @@ export default function AdminDashboard() {
                   <tr key={contact.id} className="border-t border-purple-500/20">
                     <td className="px-6 py-4 text-white">{contact.name}</td>
                     <td className="px-6 py-4 text-white">{contact.email}</td>
-                    <td className="px-6 py-4 text-white">{contact.message}</td>
+                    <td className="px-6 py-4 text-white group relative">
+                      <div className="truncate max-w-[300px]">
+                        {contact.message}
+                      </div>
+                      <div className="hidden group-hover:block absolute z-10 bg-gray-900 p-4 rounded-lg shadow-lg max-w-lg whitespace-normal left-0 mt-2">
+                        {contact.message}
+                      </div>
+                    </td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-1 rounded-full text-sm ${
                         contact.completed ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
