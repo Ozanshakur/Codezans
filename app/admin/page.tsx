@@ -4,6 +4,12 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { useToast } from "@/components/ui/use-toast"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 interface Contact {
   id: string
@@ -24,6 +30,7 @@ export default function AdminDashboard() {
   const [contacts, setContacts] = useState<Contact[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedMessage, setSelectedMessage] = useState<Contact | null>(null)
   const router = useRouter()
   const { toast } = useToast()
 
@@ -53,7 +60,6 @@ export default function AdminDashboard() {
       ])
 
       if (!contactsRes.ok || !statsRes.ok) {
-        // Check if unauthorized
         if (contactsRes.status === 401 || statsRes.status === 401) {
           router.push('/admin/login')
           return
@@ -64,7 +70,6 @@ export default function AdminDashboard() {
       const contactsData = await contactsRes.json()
       const statsData = await statsRes.json()
 
-      // Validate that we received an array of contacts
       if (!Array.isArray(contactsData)) {
         throw new Error('Invalid contacts data received')
       }
@@ -79,7 +84,6 @@ export default function AdminDashboard() {
         variant: "destructive",
       })
 
-      // If no data is loaded, show empty state
       setContacts([])
       setStats(null)
     } finally {
@@ -111,7 +115,7 @@ export default function AdminDashboard() {
         className: "bg-green-500 text-white border-none",
       })
 
-      fetchData() // Reload data
+      fetchData()
     } catch (error) {
       console.error('Error updating contact:', error)
       toast({
@@ -120,7 +124,6 @@ export default function AdminDashboard() {
         variant: "destructive",
       })
 
-      // If unauthorized, redirect to login
       if (error instanceof Error && error.message.includes('token')) {
         router.push('/admin/login')
       }
@@ -153,7 +156,7 @@ export default function AdminDashboard() {
         className: "bg-green-500 text-white border-none",
       })
 
-      fetchData() // Reload data
+      fetchData()
     } catch (error) {
       console.error('Error deleting contact:', error)
       toast({
@@ -162,7 +165,6 @@ export default function AdminDashboard() {
         variant: "destructive",
       })
 
-      // If unauthorized, redirect to login
       if (error instanceof Error && error.message.includes('token')) {
         router.push('/admin/login')
       }
@@ -233,11 +235,8 @@ export default function AdminDashboard() {
                   <tr key={contact.id} className="border-t border-purple-500/20">
                     <td className="px-6 py-4 text-white">{contact.name}</td>
                     <td className="px-6 py-4 text-white">{contact.email}</td>
-                    <td className="px-6 py-4 text-white group relative">
+                    <td className="px-6 py-4 text-white">
                       <div className="truncate max-w-[300px]">
-                        {contact.message}
-                      </div>
-                      <div className="hidden group-hover:block absolute z-10 bg-gray-900 p-4 rounded-lg shadow-lg max-w-lg whitespace-normal left-0 mt-2">
                         {contact.message}
                       </div>
                     </td>
@@ -250,6 +249,12 @@ export default function AdminDashboard() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex space-x-2">
+                        <button
+                          onClick={() => setSelectedMessage(contact)}
+                          className="text-blue-400 hover:text-blue-300"
+                        >
+                          Nachricht anzeigen
+                        </button>
                         {!contact.completed && (
                           <button
                             onClick={() => handleMarkCompleted(contact.id)}
@@ -277,6 +282,30 @@ export default function AdminDashboard() {
           )}
         </div>
       </div>
+
+      <Dialog open={!!selectedMessage} onOpenChange={() => setSelectedMessage(null)}>
+        <DialogContent className="bg-gray-900 text-white border-purple-500/20">
+          <DialogHeader>
+            <DialogTitle className="text-xl mb-4">Nachricht von {selectedMessage?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 space-y-4">
+            <div>
+              <h4 className="text-sm font-semibold text-gray-400">Email:</h4>
+              <p className="text-white">{selectedMessage?.email}</p>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-gray-400">Nachricht:</h4>
+              <p className="text-white whitespace-pre-wrap">{selectedMessage?.message}</p>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-gray-400">Datum:</h4>
+              <p className="text-white">
+                {selectedMessage?.createdAt && new Date(selectedMessage.createdAt).toLocaleString('de-DE')}
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
