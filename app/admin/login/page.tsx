@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from "@/components/ui/use-toast"
 
@@ -8,6 +8,14 @@ export default function AdminLogin() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
+
+  // Check if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem('adminToken')
+    if (token) {
+      router.push('/admin')
+    }
+  }, [router])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -22,8 +30,6 @@ export default function AdminLogin() {
         throw new Error('Bitte füllen Sie alle Felder aus')
       }
 
-      console.log('Attempting login with username:', username)
-
       const response = await fetch('/api/auth', {
         method: 'POST',
         headers: {
@@ -36,25 +42,31 @@ export default function AdminLogin() {
       })
 
       const data = await response.json()
-      console.log('Login response:', data)
 
       if (!response.ok) {
         throw new Error(data.error || 'Ein Fehler ist aufgetreten')
       }
 
       if (data.success && data.token) {
+        // Store token
         localStorage.setItem('adminToken', data.token)
+        
+        // Show success message
         toast({
           title: "Erfolg!",
           description: "Sie wurden erfolgreich eingeloggt.",
           className: "bg-green-500 text-white border-none",
         })
-        router.push('/admin')
+
+        // Force navigation and refresh
+        setTimeout(() => {
+          router.push('/admin')
+          router.refresh()
+        }, 500)
       } else {
         throw new Error('Ungültige Anmeldedaten')
       }
     } catch (error) {
-      console.error('Login error:', error)
       toast({
         title: "Fehler",
         description: error instanceof Error ? error.message : 'Ein Fehler ist aufgetreten',
