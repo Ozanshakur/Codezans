@@ -34,25 +34,40 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     try {
       const token = localStorage.getItem('adminToken')
+      if (!token) {
+        router.push('/admin/login')
+        return
+      }
+
       const [contactsRes, statsRes] = await Promise.all([
         fetch('/api/admin/contacts', {
           headers: {
-            Authorization: `Bearer ${token}`,
+            'Authorization': `Bearer ${token}`,
           },
         }),
         fetch('/api/admin/stats', {
           headers: {
-            Authorization: `Bearer ${token}`,
+            'Authorization': `Bearer ${token}`,
           },
         }),
       ])
 
       if (!contactsRes.ok || !statsRes.ok) {
+        // Check if unauthorized
+        if (contactsRes.status === 401 || statsRes.status === 401) {
+          router.push('/admin/login')
+          return
+        }
         throw new Error('Failed to fetch data')
       }
 
       const contactsData = await contactsRes.json()
       const statsData = await statsRes.json()
+
+      // Validate that we received an array of contacts
+      if (!Array.isArray(contactsData)) {
+        throw new Error('Invalid contacts data received')
+      }
 
       setContacts(contactsData)
       setStats(statsData)
@@ -60,9 +75,13 @@ export default function AdminDashboard() {
       console.error('Error fetching data:', error)
       toast({
         title: "Fehler",
-        description: "Fehler beim Laden der Daten",
+        description: error instanceof Error ? error.message : "Fehler beim Laden der Daten",
         variant: "destructive",
       })
+
+      // If no data is loaded, show empty state
+      setContacts([])
+      setStats(null)
     } finally {
       setIsLoading(false)
     }
@@ -198,51 +217,57 @@ export default function AdminDashboard() {
         )}
 
         <div className="bg-white/10 backdrop-blur-lg rounded-lg overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-black/50">
-                <th className="px-6 py-3 text-left text-white">Name</th>
-                <th className="px-6 py-3 text-left text-white">Email</th>
-                <th className="px-6 py-3 text-left text-white">Nachricht</th>
-                <th className="px-6 py-3 text-left text-white">Status</th>
-                <th className="px-6 py-3 text-left text-white">Aktionen</th>
-              </tr>
-            </thead>
-            <tbody>
-              {contacts.map((contact) => (
-                <tr key={contact.id} className="border-t border-purple-500/20">
-                  <td className="px-6 py-4 text-white">{contact.name}</td>
-                  <td className="px-6 py-4 text-white">{contact.email}</td>
-                  <td className="px-6 py-4 text-white">{contact.message}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded-full text-sm ${
-                      contact.completed ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
-                    }`}>
-                      {contact.completed ? 'Abgeschlossen' : 'Offen'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex space-x-2">
-                      {!contact.completed && (
-                        <button
-                          onClick={() => handleMarkCompleted(contact.id)}
-                          className="text-green-400 hover:text-green-300"
-                        >
-                          Abschließen
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleDelete(contact.id)}
-                        className="text-red-400 hover:text-red-300"
-                      >
-                        Löschen
-                      </button>
-                    </div>
-                  </td>
+          {contacts.length > 0 ? (
+            <table className="w-full">
+              <thead>
+                <tr className="bg-black/50">
+                  <th className="px-6 py-3 text-left text-white">Name</th>
+                  <th className="px-6 py-3 text-left text-white">Email</th>
+                  <th className="px-6 py-3 text-left text-white">Nachricht</th>
+                  <th className="px-6 py-3 text-left text-white">Status</th>
+                  <th className="px-6 py-3 text-left text-white">Aktionen</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {contacts.map((contact) => (
+                  <tr key={contact.id} className="border-t border-purple-500/20">
+                    <td className="px-6 py-4 text-white">{contact.name}</td>
+                    <td className="px-6 py-4 text-white">{contact.email}</td>
+                    <td className="px-6 py-4 text-white">{contact.message}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded-full text-sm ${
+                        contact.completed ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
+                      }`}>
+                        {contact.completed ? 'Abgeschlossen' : 'Offen'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex space-x-2">
+                        {!contact.completed && (
+                          <button
+                            onClick={() => handleMarkCompleted(contact.id)}
+                            className="text-green-400 hover:text-green-300"
+                          >
+                            Abschließen
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDelete(contact.id)}
+                          className="text-red-400 hover:text-red-300"
+                        >
+                          Löschen
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="p-8 text-center text-gray-400">
+              <p>Keine Kontaktanfragen vorhanden</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

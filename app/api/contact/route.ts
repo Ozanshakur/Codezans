@@ -22,6 +22,7 @@ export async function POST(request: Request) {
         name,
         email,
         message,
+        completed: false, // Ensure this is set
       },
     })
 
@@ -39,6 +40,8 @@ export async function POST(request: Request) {
       },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
