@@ -10,22 +10,9 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { username, password } = body
 
-    console.log('Login attempt for:', username)
-
-    if (!username || !password) {
-      return NextResponse.json(
-        { success: false, error: 'Benutzername und Passwort sind erforderlich' },
-        { status: 400 }
-      )
-    }
-
     const admin = await prisma.admin.findFirst({
-      where: {
-        username: username
-      }
+      where: { username }
     })
-
-    console.log('Admin found:', admin ? 'yes' : 'no')
 
     if (!admin) {
       return NextResponse.json(
@@ -35,7 +22,6 @@ export async function POST(request: Request) {
     }
 
     const isValidPassword = await bcrypt.compare(password, admin.password)
-    console.log('Password valid:', isValidPassword)
 
     if (!isValidPassword) {
       return NextResponse.json(
@@ -45,22 +31,15 @@ export async function POST(request: Request) {
     }
 
     const token = jwt.sign(
-      { 
-        userId: admin.id,
-        username: admin.username 
-      },
+      { userId: admin.id },
       JWT_SECRET,
       { expiresIn: '24h' }
     )
 
-    // Create response with both cookie and JSON
-    const response = NextResponse.json({
+    const response = NextResponse.json({ 
       success: true,
       token,
-      user: {
-        id: admin.id,
-        username: admin.username
-      }
+      message: 'Login erfolgreich'
     })
 
     // Set HTTP-only cookie
