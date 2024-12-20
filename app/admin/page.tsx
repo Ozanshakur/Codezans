@@ -23,16 +23,39 @@ export default function AdminDashboard() {
   const [contacts, setContacts] = useState<Contact[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
-    const token = localStorage.getItem('adminToken')
-    if (!token) {
-      router.push('/admin/login')
-      return
+    const checkAuth = async () => {
+      const token = localStorage.getItem('adminToken')
+      if (!token) {
+        router.replace('/admin/login')
+        return
+      }
+
+      try {
+        // Verify token by making a request to a protected endpoint
+        const response = await fetch('/api/admin/verify', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+
+        if (!response.ok) {
+          throw new Error('Invalid token')
+        }
+
+        setIsAuthenticated(true)
+        fetchData()
+      } catch (error) {
+        console.error('Auth error:', error)
+        localStorage.removeItem('adminToken')
+        router.replace('/admin/login')
+      }
     }
 
-    fetchData()
+    checkAuth()
   }, [router])
 
   const fetchData = async () => {
@@ -109,8 +132,15 @@ export default function AdminDashboard() {
     }
   }
 
-  if (isLoading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>
+  if (!isAuthenticated || isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-black via-purple-900 to-black">
+        <div className="text-white text-center">
+          <div className="mb-4">Laden...</div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
+        </div>
+      </div>
+    )
   }
 
   return (
