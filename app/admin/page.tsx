@@ -235,10 +235,13 @@ export default function AdminDashboard() {
                   <tr key={contact.id} className="border-t border-purple-500/20">
                     <td className="px-6 py-4 text-white">{contact.name}</td>
                     <td className="px-6 py-4 text-white">{contact.email}</td>
-                    <td className="px-6 py-4 text-white">
-                      <div className="truncate max-w-[300px]">
-                        {contact.message}
-                      </div>
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => setSelectedMessage(contact)}
+                        className="text-blue-400 hover:text-blue-300"
+                      >
+                        Nachricht anzeigen
+                      </button>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-1 rounded-full text-sm ${
@@ -249,12 +252,6 @@ export default function AdminDashboard() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex space-x-2">
-                        <button
-                          onClick={() => setSelectedMessage(contact)}
-                          className="text-blue-400 hover:text-blue-300"
-                        >
-                          Nachricht anzeigen
-                        </button>
                         {!contact.completed && (
                           <button
                             onClick={() => handleMarkCompleted(contact.id)}
@@ -295,7 +292,7 @@ export default function AdminDashboard() {
             </div>
             <div>
               <h4 className="text-sm font-semibold text-gray-400">Nachricht:</h4>
-              <p className="text-white whitespace-pre-wrap">{selectedMessage?.message}</p>
+              <p className="text-white break-words max-w-full">{selectedMessage?.message}</p>
             </div>
             <div>
               <h4 className="text-sm font-semibold text-gray-400">Datum:</h4>
